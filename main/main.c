@@ -13,6 +13,7 @@
 #include "esp_log.h"
 #include "motor.h"
 #include "UART0.h"
+#include "wifi_udp.h"
 
 static const char *TAG = "MAIN";
 
@@ -26,14 +27,23 @@ static void motor_ctrl_task(void *arg)
 
     ESP_LOGI(TAG, "Motor control task started");
 
-    while (1) {
+    while (1)
+    {
         // 阻塞等待队列消息
-        if (xQueueReceive(motor_queue, &cmd, portMAX_DELAY) == pdTRUE) {
+        if (xQueueReceive(motor_queue, &cmd, portMAX_DELAY) == pdTRUE)
+        {
             const char *dir_str;
-            switch (cmd.direction) {
-                case MOTOR_DIR_CCW: dir_str = "CCW"; break;
-                case MOTOR_DIR_CW:  dir_str = "CW";  break;
-                default:            dir_str = "STOP"; break;
+            switch (cmd.direction)
+            {
+            case MOTOR_DIR_CCW:
+                dir_str = "CCW";
+                break;
+            case MOTOR_DIR_CW:
+                dir_str = "CW";
+                break;
+            default:
+                dir_str = "STOP";
+                break;
             }
             ESP_LOGI("MotorTask", "CMD: Motor%d speed=%d%% dir=%s", cmd.motor_num, cmd.speed, dir_str);
 
@@ -49,12 +59,13 @@ void app_main(void)
 {
     ESP_LOGI(TAG, "=== Omni-Wheel Chassis ===");
 
-    // 初始化电机
-    motor_init();
+    motor_init();    // 初始化电机
+    wifi_init_sta(); // 初始化wifi通信
 
     // 创建电机指令队列 (长度5，最多缓存5条指令)
     motor_queue = xQueueCreate(5, sizeof(motor_command_t));
-    if (motor_queue == NULL) {
+    if (motor_queue == NULL)
+    {
         ESP_LOGE(TAG, "Failed to create motor queue");
         return;
     }

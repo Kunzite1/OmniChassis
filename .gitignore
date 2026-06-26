@@ -3,6 +3,10 @@ build/
 sdkconfig.old
 sdkconfig.ci
 
+# Colcon (ROS2) build artifacts
+install/
+log/
+
 # CMake generated
 compile_commands.json
 cmake-build-*/

@@ -19,17 +19,25 @@ static void event_handler(void *arg, esp_event_base_t event_base,
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
+        ESP_LOGI(TAG, "Wi-Fi 启动，开始连接...");
         esp_wifi_connect();
+    }
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
+    {
+        ESP_LOGI(TAG, "Wi-Fi 关联成功，等待 DHCP...");
     }
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
+        wifi_event_sta_disconnected_t *discon = (wifi_event_sta_disconnected_t *)event_data;
+        ESP_LOGI(TAG, "断开连接，原因码: %d，重连中...", discon->reason);
         esp_wifi_connect();
-        ESP_LOGI(TAG, "重连中...");
     }
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
         ip_event_got_ip_t *event = (ip_event_got_ip_t *)event_data;
-        ESP_LOGI(TAG, "获取到IP:" IPSTR, IP2STR(&event->ip_info.ip));
+        char ip_str[16];
+        snprintf(ip_str, sizeof(ip_str), IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI(TAG, "获取到IP: %s", ip_str);
         xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
     }
 }
@@ -85,6 +93,7 @@ void wifi_init_sta(void)
 
     ESP_LOGI(TAG, "Wi-Fi 初始化完成，等待连接...");
     xEventGroupWaitBits(s_wifi_event_group, WIFI_CONNECTED_BIT, pdFALSE, pdFALSE, portMAX_DELAY);
+    ESP_LOGI(TAG, "Wi-Fi 已连接，就绪");
 }
 
 // UDP 任务：接收并回显数据
