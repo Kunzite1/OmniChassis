@@ -29,3 +29,6 @@ __pycache__/
 
 # Cache
 .cache/
+
+# Log
+esp32_run.log

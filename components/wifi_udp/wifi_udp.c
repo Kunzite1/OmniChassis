@@ -215,4 +215,5 @@ void WifiUDP_printf(const char *format, ...)
 
     // 非阻塞入队，满则丢弃
     xQueueSend(queue_WIFI_TXBUF, &tx_item, 0);
+    ESP_LOGI(TAG, "入队: %s", (char *)tx_item.payload);
 }

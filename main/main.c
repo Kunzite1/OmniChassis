@@ -14,6 +14,7 @@
 #include "motor.h"
 #include "UART0.h"
 #include "wifi_udp.h"
+#include "attitude.h"
 
 static const char *TAG = "MAIN";
 
@@ -72,6 +73,8 @@ void app_main(void)
 
     // 创建电机控制任务
     xTaskCreate(motor_ctrl_task, "motor_ctrl", 3072, NULL, 10, NULL);
+    // 创建IMU姿态计算任务
+    xTaskCreatePinnedToCore(calculate_task, "calculate_task", 4096, NULL, 5, NULL, 0);
 
     // 初始化UART0 (传入队列句柄)
     uart0_init(motor_queue);
